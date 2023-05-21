@@ -1,7 +1,7 @@
 #######
 #######
 #######
-####### runparallel.py -s c:\Users\adam\Downloads\8090 -d c:\Users\adam\Downloads\8090\outfiles -c 8 -f *.mp3 -p "aacgain /r /k /d 2 *.mp3"
+####### runparallel.py -s c:\Users\adam\Downloads\8090 -d c:\Users\adam\Downloads\8090\outfiles -c 8 -f *.mp3 -p "filesweep.cmd"
 #######
 #######
 #######
@@ -28,30 +28,35 @@ import sys, argparse, os, glob, fnmatch, shutil, psutil, multiprocessing as mp, 
 
 
 def ErrorArg(err):
-    if err==0:
-        print('Bye!')
-        os.chdir(StartDir)
-    elif err==1:
-        print('Source directory must be specified. Use -h for help.')
-    elif err==2:
-        print('Destination directory must be specified. Use -h for help.')
-    elif err==3:
-        print('Command to pass through must be specified. Use -h for help.')
-    elif err==4:
-        print('Source directory must exist! Use -h for help.')
-    elif err==5:
-        print('Destination directory must exist! Use -h for help.')
-    elif err==6:
-        print('Failed to change directory to the source! Use -h for help.')
-    elif err==7:
-        print('No files to work with using that file spec! Use -h for help.')
-    elif err==8:
-        print('no worries. Bye!')
-        sys.exit(err)
-    elif err==8:
-        print('Can''t create sub directories! Check readonly/rights')
-
-
+    match err:
+        case 0:
+            print('Bye!')
+            os.chdir(StartDir)    
+        case 1:
+            print('Source directory must be specified. Use -h for help.')
+        case 2:
+            print('Destination directory must be specified. Use -h for help.')
+        case 3:
+            print('Command to pass through must be specified. Use -h for help.')
+        case 4:
+            print('Source directory must exist! Use -h for help.')
+        case 5:
+            print('Destination directory must exist! Use -h for help.')
+        case 6:
+            print('Failed to change directory to the source! Use -h for help.')
+        case 7:
+            print('No files to work with using that file spec! Use -h for help.')
+        case 8:
+            print('no worries. Bye!')
+            sys.exit(err)
+        case 9:
+            print('Can''t create sub directories! Check readonly/rights')
+        case _:
+            print('wtf?')
+    print()
+    print(r'Ex: runparallel.py -s c:\Users\adam\Downloads\8090 -d c:\Users\adam\Downloads\8090\outfiles -c 8 -f *.mp3 -p "filesweep.cmd"')
+    print()
+    print("note that this does not move files back to the source, so you'll need to do that manually. Also, programs like aacgain.exe need to be passed individual files, not directories. (see filesweep.cmd for an example)")
     sys.exit(err)
         
 
@@ -136,17 +141,28 @@ def spawn(MaxCores, PassThru, DestDir):
 		run_child(cpu, PassThru)
             
 def run_child(Affinity, PassThru):
-	cpu=Affinity
-	if cpu==1: Affinity=1
-	if cpu==2: Affinity=2
-	if cpu==3: Affinity=4
-	if cpu==4: Affinity=8
-	if cpu==5: Affinity=10
-	if cpu==6: Affinity=20
-	if cpu==7: Affinity=40
-	if cpu==8: Affinity=80
-	cmd='start "cpu core {} -- {}" /affinity {} {}'.format(cpu, Affinity, Affinity, PassThru)
-	os.popen(cmd)
+    cpu=Affinity
+    match cpu:
+        case 1: Affinity=1
+        case 2: Affinity=2
+        case 3: Affinity=4
+        case 4: Affinity=8
+        case 5: Affinity=10
+        case 6: Affinity=20
+        case 7: Affinity=40
+        case 8: Affinity=80
+        case 9: Affinity=100
+        case 10: Affinity=200
+        case 11: Affinity=400
+        case 12: Affinity=800
+        case 13: Affinity=1000
+        case 14: Affinity=2000
+        case 15: Affinity=4000
+        case 16: Affinity=8000
+        case _: Affinity=1
+
+    cmd='start "cpu core {} -- {}" /affinity {} {}'.format(cpu, Affinity, Affinity, PassThru)
+    os.popen(cmd)
 	#os.popen('start "cpu core '+str(cpu)+'-'+str(Affinity)+'"'+' /affinity '+str(Affinity)+' '+PassThru)
     
 def dtime(cmd):
